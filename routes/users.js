@@ -7,6 +7,11 @@ const { check, validationResult } = require('express-validator');
 const UserModel = require('../models/user');
 const User = UserModel(sequelize, Sequelize);
 
+router.get('/', async (req, res) => {
+  let users = await User.findAll();
+  res.json(users);
+});
+
 router.post(
   '/',
   [
@@ -28,14 +33,14 @@ router.post(
     const { name, email, password } = req.body;
 
     try {
-      let user = await User.findOne({ where: { name } });
+      let user = User.findOne({ where: { name } });
       if (user) {
         res.status(400).json({ msg: 'User already exists' });
       }
 
       const salt = await bcrypt.genSalt(10);
 
-      user = await User.create({
+      user = User.create({
         name,
         email,
         password: await bcrypt.hash(password, salt)
