@@ -1,14 +1,10 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { sequelize, Sequelize } = require('../models/index');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
-const UserModel = require('../models/user');
-const User = UserModel(sequelize, Sequelize);
-
+const User = require('../models/User');
 router.get('/', async (req, res) => {
-  let users = await User.findAll();
+  let users = await User.query();
   res.json(users);
 });
 
@@ -33,18 +29,17 @@ router.post(
     const { name, email, password } = req.body;
 
     try {
-      let user = User.findOne({ where: { name } });
+      let user = await User.query().findOne({ name });
       if (user) {
         res.status(400).json({ msg: 'User already exists' });
       }
 
-      const salt = await bcrypt.genSalt(10);
-
-      user = User.create({
+      user = await User.query().insert({
         name,
         email,
-        password: await bcrypt.hash(password, salt)
+        password
       });
+
       const payload = {
         user: {
           id: user.id

@@ -1,15 +1,15 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { sequelize, Sequelize } = require('../models/index');
 const { check, validationResult } = require('express-validator');
-const UserModel = require('../models/user');
-const User = UserModel(sequelize, Sequelize);
 const router = express.Router();
 const auth = require('../middleware/auth');
+const User = require('../models/User');
 router.get('/', auth, async (req, res) => {
   try {
-    const user = await User.findOne({ where: { id: req.user.id } });
+    const user = await User.query()
+      .findById(req.user.id)
+      .column('name', 'email');
     res.json(user);
   } catch (err) {
     console.error(err.message);
@@ -30,7 +30,7 @@ router.post(
     }
     const { email, password } = req.body;
     try {
-      let user = await User.findOne({ email });
+      let user = await User.query().findOne({ email });
       if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
       const isMatch = await bcrypt.compare(password, user.password);
       !isMatch ? res.status(400).json({ msg: 'Invalid credentials' }) : '';

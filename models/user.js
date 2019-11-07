@@ -1,13 +1,12 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define(
-    'User',
-    {
-      name: { type: DataTypes.STRING, allowNull: false },
-      email: { type: DataTypes.STRING, allowNull: false, unique: true },
-      password: { type: DataTypes.STRING, allowNull: false }
-    },
-    {}
-  );
-  return User;
-};
+const { Model } = require('objection');
+const Password = require('objection-password')();
+const BaseModel = require('./BaseModel');
+const db = require('../database/db');
+Model.knex(db);
+
+class User extends Password(BaseModel) {
+  static getTableName() {
+    return 'users';
+  }
+}
+module.exports = User;
