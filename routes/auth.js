@@ -1,27 +1,26 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { check, validationResult } = require('express-validator');
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const { check, validationResult } = require("express-validator");
 const router = express.Router();
-const auth = require('../middleware/auth');
-const User = require('../models/User');
-router.get('/', auth, async (req, res) => {
+const auth = require("../middleware/auth");
+const User = require("../models/User");
+router.get("/", auth, async (req, res) => {
   try {
     const user = await User.query()
       .findById(req.user.id)
-      .column('name', 'email');
+      .column("name", "email");
     res.json(user);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
   }
 });
 
 router.post(
-  '/',
+  "/",
   [
-    check('email', 'Please  include a valid email').isEmail(),
-    check('password', 'Password is required').exists()
+    check("email", "Please  include a valid email").isEmail(),
+    check("password", "Password is required").exists()
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -31,9 +30,9 @@ router.post(
     const { email, password } = req.body;
     try {
       let user = await User.query().findOne({ email });
-      if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
-      const isMatch = await bcrypt.compare(password, user.password);
-      !isMatch ? res.status(400).json({ msg: 'Invalid credentials' }) : '';
+      if (!user) return res.status(400).json({ msg: "Invalid credentials" });
+      const isMatch = user.verifyPassword(password);
+      !isMatch ? res.status(400).json({ msg: "Invalid credentials" }) : "";
 
       const payload = {
         user: {
@@ -43,7 +42,7 @@ router.post(
 
       jwt.sign(
         payload,
-        'secret',
+        "secret",
         {
           expiresIn: 3600
         },
@@ -54,7 +53,7 @@ router.post(
       );
     } catch (err) {
       console.error(err.msg);
-      res.status(500).send('Server error');
+      res.status(500).send("Server error");
     }
   }
 );

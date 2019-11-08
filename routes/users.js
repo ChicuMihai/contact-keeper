@@ -1,23 +1,26 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
+const express = require("express");
+const jwt = require("jsonwebtoken");
 const router = express.Router();
-const { check, validationResult } = require('express-validator');
-const User = require('../models/User');
-router.get('/', async (req, res) => {
-  let users = await User.query();
+const { check, validationResult } = require("express-validator");
+const User = require("../models/User");
+
+router.get("/", async (req, res) => {
+  let users = await User.query()
+    .eager("contacts")
+    .select("id", "name", "email");
   res.json(users);
 });
 
 router.post(
-  '/',
+  "/",
   [
-    check('name', 'Name is required')
+    check("name", "Name is required")
       .not()
       .isEmpty(),
-    check('email', 'Include valid email').isEmail(),
+    check("email", "Include valid email").isEmail(),
     check(
-      'password',
-      'Please enter a password with 6 or more characters'
+      "password",
+      "Please enter a password with 6 or more characters"
     ).isLength({ min: 6 })
   ],
 
@@ -31,7 +34,7 @@ router.post(
     try {
       let user = await User.query().findOne({ name });
       if (user) {
-        res.status(400).json({ msg: 'User already exists' });
+        res.status(400).json({ msg: "User already exists" });
       }
 
       user = await User.query().insert({
@@ -48,13 +51,13 @@ router.post(
 
       jwt.sign(
         payload,
-        'secret',
+        "secret",
         {
-          expiresIn: 3600
+          expiresIn: 62000
         },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.status(201).json({ token });
         }
       );
     } catch (err) {
