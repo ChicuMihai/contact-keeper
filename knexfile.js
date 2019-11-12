@@ -19,7 +19,7 @@ module.exports = {
       directory: "./database/migrations"
     },
     seeds: {
-      directory: "./db/seeds"
+      directory: "./database/seeds"
     }
   }
 };
