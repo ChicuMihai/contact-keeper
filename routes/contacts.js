@@ -1,21 +1,27 @@
-const express = require('express');
-
+const express = require("express");
+const { check } = require("express-validator");
 const router = express.Router();
+const auth = require("../middleware/auth");
+const ContactController = require("../controllers/contactController");
 
-router.get('/', (req, res) => {
-  res.send('get all contacts');
-});
+router.get("/", auth, ContactController.getUserContact);
 
-router.post('/', (req, res) => {
-  res.send('Add contact');
-});
+router.post(
+  "/",
+  [
+    auth,
+    [
+      check("name", "Name is required")
+        .not()
+        .isEmpty(),
+      check("email", "Insert a valid email").isEmail()
+    ]
+  ],
+  ContactController.createContact
+);
 
-router.put('/:id', (req, res) => {
-  res.send('Update contact');
-});
+router.patch("/:id", auth, ContactController.updateContact);
 
-router.delete('/:id', (req, res) => {
-  res.send('Delete contact');
-});
+router.delete("/:id", auth, ContactController.deleteContact);
 
 module.exports = router;

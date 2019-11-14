@@ -1,16 +1,22 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const bodyParser = require('body-parser');
+const cors = require("cors");
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 app.use(express.json({ extended: false }));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/contacts', require('./routes/contacts'));
+app.use(cors());
 
-const { sequelize } = require('./models/index');
+app.use("/api/users", require("./routes/users"));
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/contacts", require("./routes/contacts"));
 
-sequelize
-  .authenticate()
-  .then(() => console.log('Database connected...'))
-  .catch(err => console.error(err));
+app.use((req, res, next) => {
+  res.status(400).json({ error: "Not Found" });
+});
+
+/*
+For future use
+app.use((error, req, res, next) => {
+  res.status(error.status || 500).json({ error: { message: error.message } });
+});
+*/
